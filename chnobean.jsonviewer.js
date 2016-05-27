@@ -41,10 +41,8 @@
     // main public method
     function createRootElement(json) {
         indent = '';
-        var r = document.createElement('pre');
-        var content = createElement(null, json);;
-        r.textContent = content;
-        return r;
+        var content = createElement(null, json);
+        return createHTMLElement('pre', null, content);
     }
 
     // forward to the correct create function
@@ -107,6 +105,13 @@
         } else {
             return typeof o;
         }
+    }
+
+    function createHTMLElement(tag, className, content) {
+        var el = document.createElement(tag);
+        if (className) el.className = className;
+        if (content) el.textContent = content;
+        return el;
     }
 
     // the public interface
