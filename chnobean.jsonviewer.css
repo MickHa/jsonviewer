@@ -20,3 +20,7 @@
 .jsonviewer .token { 
 	color: #AAAAAA;
 }
+.jsonviewer .collapsed { 
+	color: #A050C0;
+	cursor: pointer;
+}

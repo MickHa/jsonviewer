@@ -33,44 +33,49 @@
 })(this, function () {
     "use strict";
 
+    var collapseLevel = 3;
+
     // main public method
     function createRootElement(json) {
-        var content = create(null, json, '');
+        var content = create(null, json, 0);
         return div(content, 'jsonviewer');
     }
 
     // forward to the correct create function
-    function create(key, o, comma) {
+    function create(key, o, level) {
         var type = typeofEx(o);
-        return createByType[type](key, o, comma);
+        return createByType[type](key, o, level);
     }
 
     // each type has it's own creator
     var createByType = {
         
-        'string': function(key, o) {
+        'string': function(key, o, level) {
             return start(key).concat([span('"' + o + '"', 'string')]);
         },
 
-        'number': function(key, o) {
+        'number': function(key, o, level) {
             return start(key).concat([span(o, 'number')]);
         },
 
-        'null': function(key, o) {
+        'null': function(key, o, level) {
             return start(key).concat([span('null', 'null')]);
         },
 
-        'undefined': function(key, o) {
+        'undefined': function(key, o, level) {
             return start(key).concat([span('undefined', 'undefined')]);
         },
 
-        'array': function(key, o) {
+        'array': function(key, o, level) {
             var r = start(key);
+            var collapsed = span('[...]', 'collapsed array_collapsed');
+            r.push(collapsed);
             r.push(span('[', 'token array_token'));
             var length = o.length;
             var index = 0;
+            var childLevel = level + 1;
             o.forEach(function(ao){ 
-                var child = create(null, ao);
+                var child = create(null, ao, childLevel);
                 if ((++index) != length) {
                     // not last item, add comma
                     child = [child, comma()];
@@ -78,17 +83,21 @@
                 r.push(div(child));
             });
             r.push(span(']', 'token array_token'));
+            makeCollapsible(r, collapsed, level);
             return r;
         },
 
-        'object': function(key, o) {
+        'object': function(key, o, level) {
             var keys = Object.keys(o);
             var r = start(key);
+            var collapsed = span('{...}', 'collapsed object_collapsed');
+            r.push(collapsed);
             r.push(span('{', 'token object_token'));
             var length = o.length;
             var index = 0;
+            var childLevel = level + 1;
             keys.forEach(function(k){ 
-                var child = create(k, o[k]);
+                var child = create(k, o[k], childLevel);
                 if ((++index) != length) {
                     // not last item, add comma
                     child = [child, comma()];
@@ -96,10 +105,36 @@
                 r.push(div(child));
             });
             r.push(span('}', 'token object_token'));
+            makeCollapsible(r, collapsed, level);
             return r;
         }
 
     };
+
+    function makeCollapsible(elements, collapsed, level) {
+        collapsed.addEventListener('click', collapsedOnClick);
+        if (level >= collapseLevel) {
+            var afterCollapsed = false;
+            elements.forEach(function(n) {
+                if (afterCollapsed) {
+                    n.style.display = 'none';
+                }
+                if (collapsed == n) {
+                    afterCollapsed = true;
+                }
+            });
+        } else {
+            collapsed.style.display = 'none';
+        }
+    }
+
+    function collapsedOnClick() {
+        var node = this;
+        this.style.display = 'none';
+        while(node = node.nextSibling) {
+            node.style.display = '';
+        }
+    }
 
     // creates the "key" part of sub-elements
     function start(key) {
@@ -152,6 +187,9 @@
 
     // the public interface
     return {
-        createRootElement: createRootElement
+        createRootElement: createRootElement,
+        setCollapseLevel: function (level) {
+            collapseLevel = level;
+        }
     };
 });
