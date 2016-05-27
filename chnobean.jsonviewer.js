@@ -59,7 +59,7 @@
         },
 
         'boolean': function(key, o, level) {
-            return start(key).concat([span(o, 'boolean')]);
+            return start(key).concat([span('' + o, 'boolean')]);
         },
 
         'null': function(key, o, level) {
