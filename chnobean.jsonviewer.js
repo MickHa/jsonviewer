@@ -39,7 +39,7 @@
     // main public method
     function createRootElement(json) {
         var content = create(null, json, '');
-        return createHTMLElement('pre', content);
+        return div(content, 'jsonviewer');
     }
 
     // forward to the correct create function

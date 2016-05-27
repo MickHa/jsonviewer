@@ -1,0 +1,16 @@
+.jsonvieer span {
+	font-family: monospace;
+}
+.jsonviewer div { 
+	font-family: monospace;
+	margin-left: 20px; 
+}
+.jsonviewer .key { 
+	font-weight: bold; 
+}
+.jsonviewer .number { 
+	color: blue; 
+}
+.jsonviewer .string { 
+	color: green; 
+}
