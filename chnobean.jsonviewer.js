@@ -33,9 +33,6 @@
 })(this, function () {
     "use strict";
 
-    // guard against undefined being re-defined
-    var undefined;
-
     // main public method
     function createRootElement(json) {
         var content = create(null, json, '');
@@ -52,30 +49,32 @@
     var createByType = {
         
         'string': function(key, o, comma) {
-            return [createKeyElement(key), span('"' + o + '"', 'string'), comma];
+            return start(key).concat([span('"' + o + '"', 'string'), comma]);
         },
 
         'number': function(key, o, comma) {
-            return [createKeyElement(key), span(o, 'number'), comma];
+            return start(key).concat([span(o, 'number'), comma]);
         },
 
         'null': function(key, o, comma) {
-            return [createKeyElement(key), 'null', comma];
+            return start(key).concat([span('null', 'null'), comma]);
         },
 
         'undefined': function(key, o, comma) {
-            return [createKeyElement(key), 'undefined', comma];
+            return start(key).concat([span('undefined', 'undefined'), comma]);
         },
 
         'array': function(key, o, comma) {
             var length = o.length;
             var index = 0;
-            var r = createKeyElement(key, '[')
+            var r = start(key)
+                .concat(span('[', 'token array_token'))
                 .concat(o.map(function(ao){ 
                     var last = (++index) == length;
-                    return div(create(null, ao, last ? '' : ','));
+                    return div(create(null, ao, last ? '' : span(',', 'token comma')));
                 }))
-                .concat(']' + comma);
+                .concat(span(']', 'token array_token'))
+                .concat([comma]);
             return r;
         },
 
@@ -83,23 +82,22 @@
             var keys = Object.keys(o);
             var length = keys.length;
             var index = 0;
-            var r = createKeyElement(key, '{')
+            var r = start(key)
+                .concat(span('{', 'token object_token'))
                 .concat(keys.map(function(k){ 
                     var last = (++index) == length;
-                    return div(create(k, o[k], last ? '' : ',')); 
+                    return div(create(k, o[k], last ? '' : span(',', 'token comma'))); 
                 }))
-                .concat('}' + comma);
+                .concat(span('}', 'token object_token'))
+                .concat([comma]);
             return r;
         }
 
     };
 
     // creates the "key" part of sub-elements
-    function createKeyElement(key, openBracket) {
-        return [
-            key ? span('"' + key + '": ', 'key') : null,
-            openBracket ? span(openBracket) : null
-        ];
+    function start(key) {
+        return key ? [span('"', 'token'), span(key, 'key'), span('": ', 'token')] : [];
     }
 
     // expanded version of typeof, which also supports null and an array

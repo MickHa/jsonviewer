@@ -14,3 +14,9 @@
 .jsonviewer .string { 
 	color: green; 
 }
+.jsonviewer .undefined { 
+	color: gray; 
+}
+.jsonviewer .token { 
+	color: #AAAAAA;
+}
