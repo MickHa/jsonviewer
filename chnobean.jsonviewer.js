@@ -72,6 +72,10 @@
 
         'array': function(key, o, level) {
             var r = start(key);
+            if (o.length == 0) {
+                r.push(span('[]', 'token array_token'));
+                return r;
+            }
             var collapsed = span('[...]', 'collapsed array_collapsed');
             r.push(collapsed);
             var openToken = span('[', 'token open_token array_token');
@@ -95,6 +99,10 @@
         'object': function(key, o, level) {
             var keys = Object.keys(o);
             var r = start(key);
+            if (keys.length == 0) {        
+                r.push(span('{}', 'token object_token'));
+                return r;
+            }
             var collapsed = span('{...}', 'collapsed object_collapsed');
             r.push(collapsed);
             var openToken = span('{', 'token open_token object_token');
