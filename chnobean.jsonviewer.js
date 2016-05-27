@@ -55,7 +55,7 @@
         },
 
         'number': function(key, o, level) {
-            return start(key).concat([span(o, 'number')]);
+            return start(key).concat([span('' + o, 'number')]);
         },
 
         'boolean': function(key, o, level) {
