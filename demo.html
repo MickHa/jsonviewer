@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Demo for jsonviewer</title>
+    <script type="text/javascript" src="chnobean.jsonviewer.js"></script>
+</head>
+<body>
+
+<h1>Demo for chnobean.jsonviewer</h1>
+
+<div id="container"></div>
+
+</body>
+</html>
+
+<script type="text/javascript">
+    var sampleJson = {
+        'title': 'Some funky title',
+        'version': 42,
+        'notes': [
+            {
+                'heading': 'Very first note',
+                'body': 'Does <b>not</b> matter'
+            },
+            {
+                'heading': 'Another note',
+                'body': 'Does not matter either'
+            },
+        ],
+        'tips': {
+            'before': {
+                'importance': 'high',
+                'fancynumber': 12380923
+            },
+            'after': {
+                'importance': 'low',
+                'fancydecimal': 312321.32
+            },
+            'primes': [
+                5,
+                7,
+                13,
+                'random string',
+                101,
+                {
+                    'type': 'object',
+                    'why_here': 'prime wanna be',
+                    'role model': 97
+                },
+                103
+            ]
+        }
+    };
+
+    document.getElementById('container').appendChild(chnobean.jsonviewer.createRootElement(sampleJson));
+</script>
+
