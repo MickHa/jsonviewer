@@ -70,7 +70,8 @@
             var r = start(key);
             var collapsed = span('[...]', 'collapsed array_collapsed');
             r.push(collapsed);
-            r.push(span('[', 'token array_token'));
+            var openToken = span('[', 'token open_token array_token');
+            r.push(openToken);
             var length = o.length;
             var index = 0;
             var childLevel = level + 1;
@@ -83,7 +84,7 @@
                 r.push(div(child));
             });
             r.push(span(']', 'token array_token'));
-            makeCollapsible(r, collapsed, level);
+            makeCollapsible(r, collapsed, openToken, level);
             return r;
         },
 
@@ -92,7 +93,8 @@
             var r = start(key);
             var collapsed = span('{...}', 'collapsed object_collapsed');
             r.push(collapsed);
-            r.push(span('{', 'token object_token'));
+            var openToken = span('{', 'token open_token object_token');
+            r.push(openToken);
             var length = keys.length;
             var index = 0;
             var childLevel = level + 1;
@@ -105,14 +107,15 @@
                 r.push(div(child));
             });
             r.push(span('}', 'token object_token'));
-            makeCollapsible(r, collapsed, level);
+            makeCollapsible(r, collapsed, openToken, level);
             return r;
         }
 
     };
 
-    function makeCollapsible(elements, collapsed, level) {
+    function makeCollapsible(elements, collapsed, openToken, level) {
         collapsed.addEventListener('click', collapsedOnClick);
+        openToken.addEventListener('click', openTokenOnClick);
         if (level >= collapseLevel) {
             var afterCollapsed = false;
             elements.forEach(function(n) {
@@ -129,10 +132,22 @@
     }
 
     function collapsedOnClick() {
+        // TODO: fix this hacky tree traversal
         var node = this;
-        this.style.display = 'none';
+        node.style.display = 'none';
         while(node = node.nextSibling) {
             node.style.display = '';
+        }
+    }
+
+    function openTokenOnClick() {
+        // TODO: fix this hacky tree traversal
+        var node = this.previousSibling;
+        node.style.display = '';
+        while(node = node.nextSibling) {
+            if (node.className !== 'token comma') {
+                node.style.display = 'none';
+            }
         }
     }
 
