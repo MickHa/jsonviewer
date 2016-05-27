@@ -11,6 +11,12 @@
 .jsonviewer .number { 
 	color: blue; 
 }
+.jsonviewer .boolean { 
+	color: #000088; 
+}
+.jsonviewer .null { 
+	color: #000088; 
+}
 .jsonviewer .string { 
 	color: green; 
 }

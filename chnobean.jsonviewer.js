@@ -58,6 +58,10 @@
             return start(key).concat([span(o, 'number')]);
         },
 
+        'boolean': function(key, o, level) {
+            return start(key).concat([span(o, 'boolean')]);
+        },
+
         'null': function(key, o, level) {
             return start(key).concat([span('null', 'null')]);
         },
