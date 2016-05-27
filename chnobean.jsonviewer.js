@@ -48,48 +48,54 @@
     // each type has it's own creator
     var createByType = {
         
-        'string': function(key, o, comma) {
-            return start(key).concat([span('"' + o + '"', 'string'), comma]);
+        'string': function(key, o) {
+            return start(key).concat([span('"' + o + '"', 'string')]);
         },
 
-        'number': function(key, o, comma) {
-            return start(key).concat([span(o, 'number'), comma]);
+        'number': function(key, o) {
+            return start(key).concat([span(o, 'number')]);
         },
 
-        'null': function(key, o, comma) {
-            return start(key).concat([span('null', 'null'), comma]);
+        'null': function(key, o) {
+            return start(key).concat([span('null', 'null')]);
         },
 
-        'undefined': function(key, o, comma) {
-            return start(key).concat([span('undefined', 'undefined'), comma]);
+        'undefined': function(key, o) {
+            return start(key).concat([span('undefined', 'undefined')]);
         },
 
-        'array': function(key, o, comma) {
+        'array': function(key, o) {
+            var r = start(key);
+            r.push(span('[', 'token array_token'));
             var length = o.length;
             var index = 0;
-            var r = start(key)
-                .concat(span('[', 'token array_token'))
-                .concat(o.map(function(ao){ 
-                    var last = (++index) == length;
-                    return div(create(null, ao, last ? '' : span(',', 'token comma')));
-                }))
-                .concat(span(']', 'token array_token'))
-                .concat([comma]);
+            o.forEach(function(ao){ 
+                var child = create(null, ao);
+                if ((++index) != length) {
+                    // not last item, add comma
+                    child = [child, comma()];
+                }
+                r.push(div(child));
+            });
+            r.push(span(']', 'token array_token'));
             return r;
         },
 
-        'object': function(key, o, comma) {
+        'object': function(key, o) {
             var keys = Object.keys(o);
-            var length = keys.length;
+            var r = start(key);
+            r.push(span('{', 'token object_token'));
+            var length = o.length;
             var index = 0;
-            var r = start(key)
-                .concat(span('{', 'token object_token'))
-                .concat(keys.map(function(k){ 
-                    var last = (++index) == length;
-                    return div(create(k, o[k], last ? '' : span(',', 'token comma'))); 
-                }))
-                .concat(span('}', 'token object_token'))
-                .concat([comma]);
+            keys.forEach(function(k){ 
+                var child = create(k, o[k]);
+                if ((++index) != length) {
+                    // not last item, add comma
+                    child = [child, comma()];
+                }
+                r.push(div(child));
+            });
+            r.push(span('}', 'token object_token'));
             return r;
         }
 
@@ -109,6 +115,10 @@
         } else {
             return typeof o;
         }
+    }
+
+    function comma() {
+        return span(',', 'token comma');
     }
 
     function span(content, className) {
