@@ -93,7 +93,7 @@
             var collapsed = span('{...}', 'collapsed object_collapsed');
             r.push(collapsed);
             r.push(span('{', 'token object_token'));
-            var length = o.length;
+            var length = keys.length;
             var index = 0;
             var childLevel = level + 1;
             keys.forEach(function(k){ 
