@@ -71,62 +71,49 @@
         },
 
         'array': function(key, o, level) {
-            var r = start(key);
-            if (o.length == 0) {
-                r.push(span('[]', 'token array_token'));
-                return r;
-            }
-            var collapsed = span('[' + ellipsis(o.length) + ']', 'collapsed array_collapsed');
-            r.push(collapsed);
-            var openToken = span('[', 'token open_token array_token');
-            r.push(openToken);
-            var length = o.length;
-            var index = 0;
             var childLevel = level + 1;
-            o.forEach(function(ao){ 
-                var child = create(null, ao, childLevel);
-                if ((++index) != length) {
-                    // not last item, add comma
-                    child = [child, comma()];
-                }
-                r.push(div(child));
+            var children = o.map(function(ao) {
+                return create(null, ao, childLevel);
             });
-            r.push(span(']', 'token array_token'));
-            makeCollapsible(r, collapsed, openToken, level);
-            return r;
+            return createNested(key, children, '[', ']', 'array', level);
         },
 
         'object': function(key, o, level) {
-            var keys = Object.keys(o);
-            var r = start(key);
-            if (keys.length == 0) {        
-                r.push(span('{}', 'token object_token'));
-                return r;
-            }
-            var collapsed = span('{' + ellipsis(keys.length) + '}', 'collapsed object_collapsed');
-            r.push(collapsed);
-            var openToken = span('{', 'token open_token object_token');
-            r.push(openToken);
-            var length = keys.length;
-            var index = 0;
             var childLevel = level + 1;
-            keys.forEach(function(k){ 
-                var child = create(k, o[k], childLevel);
-                if ((++index) != length) {
-                    // not last item, add comma
-                    child = [child, comma()];
-                }
-                r.push(div(child));
+            var children = Object.keys(o).map(function(k) {
+                return create(k, o[k], childLevel);
             });
-            r.push(span('}', 'token object_token'));
-            makeCollapsible(r, collapsed, openToken, level);
-            return r;
+            return createNested(key, children, '{', '}', 'object', level);
         }
 
     };
 
     function createSimple(key, stringableValue, className) {
         return start(key).concat([span('' + stringableValue, className)]);
+    }
+
+    function createNested(key, children, openToken, closeToken, classPrefix, level) {
+        var r = start(key);
+        if (children.length == 0) {        
+            r.push(span(openToken + closeToken, 'token ' + classPrefix + '_token'));
+            return r;
+        }
+        var collapsed = span(openToken + ellipsis(children.length) + closeToken, 'collapsed ' + classPrefix +'_collapsed');
+        r.push(collapsed);
+        var openToken = span(openToken, 'token open_token ' + classPrefix + '_token');
+        r.push(openToken);
+        var length = children.length;
+        var index = 0;
+        children.forEach(function(child){ 
+            if ((++index) != length) {
+                // not last item, add comma
+                child = [child, comma()];
+            }
+            r.push(div(child));
+        });
+        r.push(span(closeToken, 'token ' + classPrefix + '_token'));
+        makeCollapsible(r, collapsed, openToken, level);
+        return r;
     }
 
     function makeCollapsible(elements, collapsed, openToken, level) {
