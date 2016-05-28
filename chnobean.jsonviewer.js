@@ -76,7 +76,7 @@
                 r.push(span('[]', 'token array_token'));
                 return r;
             }
-            var collapsed = span('[...]', 'collapsed array_collapsed');
+            var collapsed = span('[' + ellipsis(o.length) + ']', 'collapsed array_collapsed');
             r.push(collapsed);
             var openToken = span('[', 'token open_token array_token');
             r.push(openToken);
@@ -103,7 +103,7 @@
                 r.push(span('{}', 'token object_token'));
                 return r;
             }
-            var collapsed = span('{...}', 'collapsed object_collapsed');
+            var collapsed = span('{' + ellipsis(keys.length) + '}', 'collapsed object_collapsed');
             r.push(collapsed);
             var openToken = span('{', 'token open_token object_token');
             r.push(openToken);
@@ -181,6 +181,15 @@
 
     function comma() {
         return span(',', 'token comma');
+    }
+
+    function ellipsis(length) {
+        var l = Math.min(20, length);
+        var s = '';
+        while(l--) { 
+            s+= '.';
+        }
+        return s;
     }
 
     function span(content, className) {
