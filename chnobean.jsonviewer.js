@@ -42,70 +42,76 @@
     }
 
     // forward to the correct create function
-    function create(key, o, level, hasNext) {
-        var type = typeofEx(o);
-        return createByType[type](key, o, level, hasNext);
+    function create(key, obj, level, hasNext) {
+        var nodeInfo = {
+            key: key,
+            obj: obj,
+            type: typeofEx(obj),
+            level: level,
+            hasNext: hasNext
+        };
+        switch(nodeInfo.type) {
+            case 'object':
+                nodeInfo.openToken = '{';
+                nodeInfo.closeToken = '}';
+                nodeInfo.children = createObjectChildren(nodeInfo);
+                break;
+            case 'array':
+                nodeInfo.openToken = '[';
+                nodeInfo.closeToken = ']';
+                nodeInfo.children = createArrayChildren(nodeInfo);
+                break;
+            case 'string':
+                nodeInfo.simpleContent = '"' + obj + '"';
+                break;
+            // number, boolean, null, undefined
+            default: 
+                nodeInfo.simpleContent = '' + obj
+                break;
+        }
+        if (nodeInfo.children) {
+            return createNested(nodeInfo);
+        } else {
+            return createSimple(nodeInfo);
+        }
     }
 
-    // each type has it's own creator
-    var createByType = {
-        
-        'string': function(key, o, level, hasNext) {
-            return createSimple(key, '"' + o + '"', 'string', hasNext);
-        },
+    function createArrayChildren(nodeInfo) {
+        var childLevel = nodeInfo.level + 1;
+        var arr = nodeInfo.obj;
+        return arr.map(function(ao, i) {
+            return create(null, ao, childLevel, i+1 < arr.length);
+        });
+    }
 
-        'number': function(key, o, level, hasNext) {
-            return createSimple(key, o, 'number', hasNext);
-        },
+    function createObjectChildren(nodeInfo) {
+        var childLevel = nodeInfo.level + 1;
+        var obj = nodeInfo.obj;
+        var keys = Object.keys(obj);
+        return keys.map(function(k, i) {
+            return create(k, obj[k], childLevel, i+1 < keys.length);
+        }); 
+    }
 
-        'boolean': function(key, o, level, hasNext) {
-            return createSimple(key, o, 'boolean', hasNext);
-        },
-
-        'null': function(key, o, level, hasNext) {
-            return createSimple(key, 'null', 'null', hasNext);
-        },
-
-        'undefined': function(key, o, level, hasNext) {
-            return createSimple(key, 'undefined', 'undefined', hasNext);
-        },
-
-        'array': function(key, o, level, hasNext) {
-            var childLevel = level + 1;
-            var children = o.map(function(ao, i) {
-                return create(null, ao, childLevel, i+1 < o.length);
-            });
-            return createNested(key, children, '[', ']', 'array', level, hasNext);
-        },
-
-        'object': function(key, o, level, hasNext) {
-            var childLevel = level + 1;
-            var keys = Object.keys(o);
-            var children = keys.map(function(k, i) {
-                return create(k, o[k], childLevel, i+1 < keys.length);
-            });
-            return createNested(key, children, '{', '}', 'object', level, hasNext);
-        }
-
-    };
-
-    function createSimple(key, stringableValue, className, hasNext) {
-        var r = start(key).concat([span('' + stringableValue, className)]);
-        if (hasNext) r.push(comma());
+    function createSimple(nodeInfo) {
+        var r = start(nodeInfo).concat([span(nodeInfo.simpleContent, nodeInfo.type)]);
+        addComma(r, nodeInfo);
         return div(r);
     }
 
-    function createNested(key, children, openToken, closeToken, classPrefix, level, hasNext) {
-        if (children.length == 0) {    
-            return createSimple(key, openToken + closeToken, 'token ' + classPrefix + '_token', hasNext);
+    // create nested content (includes an open and a collapsed version, one of which is hidden)
+    function createNested(nodeInfo) {
+        if (nodeInfo.children.length == 0) {
+            nodeInfo.simpleContent = nodeInfo.openToken + nodeInfo.closeToken;
+            return createSimple(nodeInfo);
         }
-        var open = createNestedOpen(key, children, openToken, closeToken, classPrefix, level, hasNext);
-        var collapsed = createNestedCollapsed(key, children, openToken, closeToken, classPrefix, level, hasNext);
+        var open = createNestedOpen(nodeInfo);
+        var collapsed = createNestedCollapsed(nodeInfo);
         open._toggleWith = collapsed;
         open.addEventListener('click', collapseToggleOnClick);
         collapsed._toggleWith = open;
         collapsed.addEventListener('click', collapseToggleOnClick);
-        if (level >= collapseLevel) {
+        if (nodeInfo.level >= collapseLevel) {
             open.style.display = 'none';
         } else {
             collapsed.style.display = 'none';
@@ -113,33 +119,36 @@
         return [collapsed, open];
     }
 
-    function createNestedOpen(key, children, openToken, closeToken, classPrefix, level, hasNext) {
-        var r = start(key);
-        var openToken = span(openToken, 'token open_token ' + classPrefix + '_token');
-        r.push(openToken);
-        r.push(children);
-        r.push(span(closeToken, 'token ' + classPrefix + '_token'));
-        if (hasNext) r.push(comma());
+    function createNestedOpen(nodeInfo) {
+        var r = start(nodeInfo);
+        r.push(span(nodeInfo.openToken, 'token open_token ' + nodeInfo.type + '_token'));
+        r.push(nodeInfo.children);
+        r.push(span(nodeInfo.closeToken, 'token close_token ' + nodeInfo.type + '_token'));
+        addComma(r, nodeInfo);
         return div(r, 'open');
     }
 
-    function createNestedCollapsed(key, children, openToken, closeToken, classPrefix, level, hasNext) {
-        var r = start(key);
-        var collapsed = span(openToken + ellipsis(children.length) + closeToken, 'ellipsis ' + classPrefix +'_ellipsis');
-        r.push(collapsed);
-        if (hasNext) r.push(comma());
+    function createNestedCollapsed(nodeInfo) {
+        var r = start(nodeInfo);
+        r.push(span(nodeInfo.openToken + ellipsis(nodeInfo.children.length) + nodeInfo.closeToken, 'ellipsis ' + nodeInfo.tyoe +'_ellipsis'));
+        addComma(r, nodeInfo);
         return div(r, 'collapsed');
+    }
+
+    // creates the "key" part of sub-elements
+    function start(nodeInfo) {
+        var key = nodeInfo.key;
+        return key ? [span('"', 'token'), span(key, 'key'), span('": ', 'token')] : [];
+    }
+
+    function addComma(r, nodeInfo) {
+        if (nodeInfo.hasNext) r.push(span(',', 'token comma'));
     }
 
     function collapseToggleOnClick(event) {
         this.style.display = 'none';
         this._toggleWith.style.display = '';
         event.stopPropagation();
-    }
-
-    // creates the "key" part of sub-elements
-    function start(key) {
-        return key ? [span('"', 'token'), span(key, 'key'), span('": ', 'token')] : [];
     }
 
     // expanded version of typeof, which also supports null and an array
@@ -151,10 +160,6 @@
         } else {
             return typeof o;
         }
-    }
-
-    function comma() {
-        return span(',', 'token comma');
     }
 
     function ellipsis(length) {
@@ -183,6 +188,8 @@
         return el;
     }
 
+    // appends given content to existing content of the element
+    // content can be a empty, string or a node. Or array of any combinatin of those, including of another such array.
     function appendContent(el, content) {
         if (content) {
             if (content.nodeType > 0) {

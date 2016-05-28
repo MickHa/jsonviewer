@@ -14,11 +14,6 @@
 
     <div id="container"></div>
 
-</div>
-
-</body>
-</html>
-
 <script type="text/javascript">
     var sampleJson = {
         'title': 'Some funky title',
@@ -86,4 +81,46 @@
 
     document.getElementById('container').appendChild(chnobean.jsonviewer.createRootElement(sampleJson));
 </script>
+
+<div>
+<script type="text/javascript">
+    var strJsonOriginal = JSON.stringify(sampleJson);
+
+    var cloned = document.getElementById('container').cloneNode(true);
+    function remove_collapsed(n) {
+        var child = n.firstChild;
+        var toDelete;
+        while(child) {
+            if (child.className && child.className.indexOf('collapsed') >= 0) {
+                toDelete = child;
+            } else {
+                toDelete = null;
+            }
+            remove_collapsed(child);
+            child = child.nextSibling;
+            toDelete && toDelete.parentNode.removeChild(toDelete);
+        }
+    }
+    remove_collapsed(cloned);
+
+    try {
+        var jsonRendered;
+        eval('jsonRendered = ' + cloned.textContent)
+        var strJsonRenderer = JSON.stringify(jsonRendered);
+        if (strJsonRenderer != strJsonOriginal) {
+            throw 'no match';
+        } 
+    } catch(e) {
+        document.write('<div style="color:red">json does not match</div>');
+    }
+</script>
+
+</div>
+
+
+</div>
+
+</body>
+</html>
+
 
