@@ -42,116 +42,99 @@
     }
 
     // forward to the correct create function
-    function create(key, o, level) {
+    function create(key, o, level, hasNext) {
         var type = typeofEx(o);
-        return createByType[type](key, o, level);
+        return createByType[type](key, o, level, hasNext);
     }
 
     // each type has it's own creator
     var createByType = {
         
-        'string': function(key, o) {
-            return createSimple(key, '"' + o + '"', 'string');
+        'string': function(key, o, level, hasNext) {
+            return createSimple(key, '"' + o + '"', 'string', hasNext);
         },
 
-        'number': function(key, o) {
-            return createSimple(key, o, 'number');
+        'number': function(key, o, level, hasNext) {
+            return createSimple(key, o, 'number', hasNext);
         },
 
-        'boolean': function(key, o) {
-            return createSimple(key, o, 'boolean');
+        'boolean': function(key, o, level, hasNext) {
+            return createSimple(key, o, 'boolean', hasNext);
         },
 
-        'null': function(key, o) {
-            return createSimple(key, 'null', 'null');
+        'null': function(key, o, level, hasNext) {
+            return createSimple(key, 'null', 'null', hasNext);
         },
 
-        'undefined': function(key, o, level) {
-            return createSimple(key, 'undefined', 'undefined');
+        'undefined': function(key, o, level, hasNext) {
+            return createSimple(key, 'undefined', 'undefined', hasNext);
         },
 
-        'array': function(key, o, level) {
+        'array': function(key, o, level, hasNext) {
             var childLevel = level + 1;
-            var children = o.map(function(ao) {
-                return create(null, ao, childLevel);
+            var children = o.map(function(ao, i) {
+                return create(null, ao, childLevel, i+1 < o.length);
             });
-            return createNested(key, children, '[', ']', 'array', level);
+            return createNested(key, children, '[', ']', 'array', level, hasNext);
         },
 
-        'object': function(key, o, level) {
+        'object': function(key, o, level, hasNext) {
             var childLevel = level + 1;
-            var children = Object.keys(o).map(function(k) {
-                return create(k, o[k], childLevel);
+            var keys = Object.keys(o);
+            var children = keys.map(function(k, i) {
+                return create(k, o[k], childLevel, i+1 < keys.length);
             });
-            return createNested(key, children, '{', '}', 'object', level);
+            return createNested(key, children, '{', '}', 'object', level, hasNext);
         }
 
     };
 
-    function createSimple(key, stringableValue, className) {
-        return start(key).concat([span('' + stringableValue, className)]);
+    function createSimple(key, stringableValue, className, hasNext) {
+        var r = start(key).concat([span('' + stringableValue, className)]);
+        if (hasNext) r.push(comma());
+        return div(r);
     }
 
-    function createNested(key, children, openToken, closeToken, classPrefix, level) {
-        var r = start(key);
-        if (children.length == 0) {        
-            r.push(span(openToken + closeToken, 'token ' + classPrefix + '_token'));
-            return r;
+    function createNested(key, children, openToken, closeToken, classPrefix, level, hasNext) {
+        if (children.length == 0) {    
+            return createSimple(key, openToken + closeToken, 'token ' + classPrefix + '_token', hasNext);
         }
-        var collapsed = span(openToken + ellipsis(children.length) + closeToken, 'collapsed ' + classPrefix +'_collapsed');
-        r.push(collapsed);
-        var openToken = span(openToken, 'token open_token ' + classPrefix + '_token');
-        r.push(openToken);
-        var length = children.length;
-        var index = 0;
-        children.forEach(function(child){ 
-            if ((++index) != length) {
-                // not last item, add comma
-                child = [child, comma()];
-            }
-            r.push(div(child));
-        });
-        r.push(span(closeToken, 'token ' + classPrefix + '_token'));
-        makeCollapsible(r, collapsed, openToken, level);
-        return r;
-    }
-
-    function makeCollapsible(elements, collapsed, openToken, level) {
-        collapsed.addEventListener('click', collapsedOnClick);
-        openToken.addEventListener('click', openTokenOnClick);
+        var open = createNestedOpen(key, children, openToken, closeToken, classPrefix, level, hasNext);
+        var collapsed = createNestedCollapsed(key, children, openToken, closeToken, classPrefix, level, hasNext);
+        open._toggleWith = collapsed;
+        open.addEventListener('click', collapseToggleOnClick);
+        collapsed._toggleWith = open;
+        collapsed.addEventListener('click', collapseToggleOnClick);
         if (level >= collapseLevel) {
-            var afterCollapsed = false;
-            elements.forEach(function(n) {
-                if (afterCollapsed) {
-                    n.style.display = 'none';
-                }
-                if (collapsed == n) {
-                    afterCollapsed = true;
-                }
-            });
+            open.style.display = 'none';
         } else {
             collapsed.style.display = 'none';
         }
+        return [collapsed, open];
     }
 
-    function collapsedOnClick() {
-        // TODO: fix this hacky tree traversal
-        var node = this;
-        node.style.display = 'none';
-        while(node = node.nextSibling) {
-            node.style.display = '';
-        }
+    function createNestedOpen(key, children, openToken, closeToken, classPrefix, level, hasNext) {
+        var r = start(key);
+        var openToken = span(openToken, 'token open_token ' + classPrefix + '_token');
+        r.push(openToken);
+        r.push(children);
+        r.push(span(closeToken, 'token ' + classPrefix + '_token'));
+        if (hasNext) r.push(comma());
+        return div(r, 'open');
     }
 
-    function openTokenOnClick() {
-        // TODO: fix this hacky tree traversal
-        var node = this.previousSibling;
-        node.style.display = '';
-        while(node = node.nextSibling) {
-            if (node.className !== 'token comma') {
-                node.style.display = 'none';
-            }
-        }
+    function createNestedCollapsed(key, children, openToken, closeToken, classPrefix, level, hasNext) {
+        var r = start(key);
+        var collapsed = span(openToken + ellipsis(children.length) + closeToken, 'ellipsis ' + classPrefix +'_ellipsis');
+        r.push(collapsed);
+        if (hasNext) r.push(comma());
+        return div(r, 'collapsed');
+    }
+
+    function collapseToggleOnClick(event) {
+        this.style.display = 'none';
+        this._toggleWith.style.display = '';
+        event.stopPropagation();
     }
 
     // creates the "key" part of sub-elements

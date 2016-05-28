@@ -29,7 +29,9 @@
 .jsonviewer .open_token {
 	cursor: pointer;
 }
-.jsonviewer .collapsed { 
+.jsonviewer .ellipsis { 
 	color: #A050C0;
+}
+.jsonviewer .collapsed { 
 	cursor: pointer;
 }
