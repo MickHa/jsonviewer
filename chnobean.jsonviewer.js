@@ -50,24 +50,24 @@
     // each type has it's own creator
     var createByType = {
         
-        'string': function(key, o, level) {
-            return start(key).concat([span('"' + o + '"', 'string')]);
+        'string': function(key, o) {
+            return createSimple(key, '"' + o + '"', 'string');
         },
 
-        'number': function(key, o, level) {
-            return start(key).concat([span('' + o, 'number')]);
+        'number': function(key, o) {
+            return createSimple(key, o, 'number');
         },
 
-        'boolean': function(key, o, level) {
-            return start(key).concat([span('' + o, 'boolean')]);
+        'boolean': function(key, o) {
+            return createSimple(key, o, 'boolean');
         },
 
-        'null': function(key, o, level) {
-            return start(key).concat([span('null', 'null')]);
+        'null': function(key, o) {
+            return createSimple(key, 'null', 'null');
         },
 
         'undefined': function(key, o, level) {
-            return start(key).concat([span('undefined', 'undefined')]);
+            return createSimple(key, 'undefined', 'undefined');
         },
 
         'array': function(key, o, level) {
@@ -124,6 +124,10 @@
         }
 
     };
+
+    function createSimple(key, stringableValue, className) {
+        return start(key).concat([span('' + stringableValue, className)]);
+    }
 
     function makeCollapsible(elements, collapsed, openToken, level) {
         collapsed.addEventListener('click', collapsedOnClick);
