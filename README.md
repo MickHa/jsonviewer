@@ -10,7 +10,7 @@ JSON as a pretty and collapsible HTML
 
 <div id="container"></div>
 
-<script>
+<script type="text/javascript" >
     var jsonViewerData = chnobean.jsonviewer.domify(sampleJson);
     document.getElementById('container').appendChild(jsonViewerData.rootElement);
 </script>
