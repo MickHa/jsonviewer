@@ -110,7 +110,7 @@
     function createSimple(nodeInfo) {
         var r = start(nodeInfo).concat([span(nodeInfo.simpleContent, nodeInfo.type)]);
         addComma(r, nodeInfo);
-        return div(r, 'nested');
+        return div(r, nodeInfo.level > 0 ? 'nested' : 'root');
     }
 
     // create nested content (includes an open and a collapsed version, one of which is hidden)
@@ -128,7 +128,7 @@
         } else {
             collapsed.style.display = 'none';
         }
-        return [collapsed, open];
+        return div([collapsed, open], nodeInfo.level > 0 ? 'nested' : 'root');
     }
 
     function createNestedEmpty(nodeInfo) {
@@ -152,14 +152,14 @@
         footer._nodeInfo = nodeInfo;
         footer.addEventListener('click', onClickCollapse);
 
-        return div([header, nodeInfo.children, footer], 'nested open');
+        return div([header, nodeInfo.children, footer], 'open');
     }
 
     function createNestedCollapsed(nodeInfo) {
         var r = start(nodeInfo);
         r.push(span(nodeInfo.openToken + ellipsis(nodeInfo.children.length) + nodeInfo.closeToken, 'ellipsis ' + nodeInfo.type +'_ellipsis'));
         addComma(r, nodeInfo);
-        var el = div(r, 'nested collapsed');
+        var el = div(r, 'collapsed');
         el._nodeInfo = nodeInfo;
         el.addEventListener('click', onClickOpen);
         return el;
