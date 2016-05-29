@@ -36,8 +36,8 @@
     var defaultOptions = {
         // returns true if this node should start out collapsed
         shouldStartCollapsed: function (nodeInfo) {
-            // hide every 3rd level, unless it has less 2 or less descendandts
-            return nodeInfo.level > 0 && (nodeInfo.level % 3 == 0) && (nodeInfo.descendantsLength > 2);
+            // hide every 3rd level, unless it has less 3 or less descendandts
+            return nodeInfo.level > 0 && (nodeInfo.level % 3 == 0) && (nodeInfo.descendantsLength > 3);
         },
         // returns the text content that should be used for ellipsis (collapsed) element
         createEllipsis: function (nodeInfo) {
