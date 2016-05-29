@@ -41,7 +41,11 @@
         },
         // returns the text content that should be used for ellipsis (collapsed) element
         createEllipsis: function (nodeInfo) {
-            return nodeInfo.openToken + ellipsis(nodeInfo.children.length) + nodeInfo.closeToken;
+            var s = nodeInfo.openToken;
+            var l = Math.min(40, nodeInfo.descendantsLength);
+            while(l--) { s+= '.'; }
+            s += nodeInfo.closeToken;
+            return s;
         }
     };
 
@@ -67,8 +71,15 @@
             obj: obj,
             type: typeofEx(obj),
             level: level,
+            descendantsLength: 0,
             hasNext: hasNext
         };
+        // TODO: there should be a better way to count descendantsLength
+        var ancestor = parent;
+        while(ancestor) {
+            ancestor.descendantsLength++;
+            ancestor = ancestor.parent;
+        }
         switch(nodeInfo.type) {
             case 'object':
                 nodeInfo.openToken = '{';
@@ -204,15 +215,6 @@
         } else {
             return typeof o;
         }
-    }
-
-    function ellipsis(length) {
-        var l = Math.min(20, length);
-        var s = '';
-        while(l--) { 
-            s+= '.';
-        }
-        return s;
     }
 
     function span(content, className) {
