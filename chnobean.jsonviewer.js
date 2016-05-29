@@ -33,10 +33,20 @@
 })(this, function () {
     "use strict";
 
-    var collapseLevel = 3;
+    var defaultOptions = {
+        shouldStartCollapsed: function (nodeInfo) {
+            // hide every 3rd level
+            return nodeInfo.level > 0 && (nodeInfo.level % 3 == 0);
+        }
+    };
+
+    var options;
 
     // main public method
-    function domify(json, options) {
+    function domify(json, customOptions) {
+        options = {};
+        mixin(options, defaultOptions);
+        mixin(options, customOptions);
         var content = create(null, json, 0);
         var rootElement = div(content, 'jsonviewer');
         return {
@@ -111,7 +121,8 @@
         var collapsed = createNestedCollapsed(nodeInfo);
         nodeInfo.element = open;
         nodeInfo.collapsedElement = collapsed;
-        if (nodeInfo.level >= collapseLevel) {
+
+        if (options.shouldStartCollapsed(nodeInfo)) {
             open.style.display = 'none';
         } else {
             collapsed.style.display = 'none';
@@ -225,6 +236,12 @@
             } else {
                 el.appendChild(document.createTextNode(content));
             }
+        }
+    }
+
+    function mixin(to, from) {
+        if (from) {
+            Object.keys(from).forEach(function(key) {to[key] = from[key]});
         }
     }
 
