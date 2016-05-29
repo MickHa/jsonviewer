@@ -36,9 +36,12 @@
     var collapseLevel = 3;
 
     // main public method
-    function createRootElement(json) {
+    function domify(json, options) {
         var content = create(null, json, 0);
-        return div(content, 'jsonviewer');
+        var rootElement = div(content, 'jsonviewer');
+        return {
+            rootElement: rootElement
+        };
     }
 
     // forward to the correct create function
@@ -102,8 +105,7 @@
     // create nested content (includes an open and a collapsed version, one of which is hidden)
     function createNested(nodeInfo) {
         if (nodeInfo.children.length == 0) {
-            nodeInfo.simpleContent = nodeInfo.openToken + nodeInfo.closeToken;
-            return createSimple(nodeInfo);
+           return createNestedEmpty(nodeInfo);
         }
         var open = createNestedOpen(nodeInfo);
         var collapsed = createNestedCollapsed(nodeInfo);
@@ -115,6 +117,12 @@
             collapsed.style.display = 'none';
         }
         return [collapsed, open];
+    }
+
+    function createNestedEmpty(nodeInfo) {
+        var r = start(nodeInfo).concat([span(nodeInfo.openToken + nodeInfo.closeToken, 'token ' + nodeInfo.type + '_token')]);
+        addComma(r, nodeInfo);
+        return div(r, 'nested');
     }
 
     function createNestedOpen(nodeInfo) {
@@ -137,7 +145,7 @@
 
     function createNestedCollapsed(nodeInfo) {
         var r = start(nodeInfo);
-        r.push(span(nodeInfo.openToken + ellipsis(nodeInfo.children.length) + nodeInfo.closeToken, 'ellipsis ' + nodeInfo.tyoe +'_ellipsis'));
+        r.push(span(nodeInfo.openToken + ellipsis(nodeInfo.children.length) + nodeInfo.closeToken, 'ellipsis ' + nodeInfo.type +'_ellipsis'));
         addComma(r, nodeInfo);
         var el = div(r, 'nested collapsed');
         el._nodeInfo = nodeInfo;
@@ -222,9 +230,6 @@
 
     // the public interface
     return {
-        createRootElement: createRootElement,
-        setCollapseLevel: function (level) {
-            collapseLevel = level;
-        }
+        domify: domify
     };
 });

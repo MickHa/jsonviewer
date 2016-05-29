@@ -50,7 +50,10 @@
                         'hello',
                         null,
                     ],
-                    undefined
+                    undefined,
+                    {},
+                    [],
+                    321
                 ]
             }
         ],
@@ -79,7 +82,9 @@
         }
     };
 
-    document.getElementById('container').appendChild(chnobean.jsonviewer.createRootElement(sampleJson));
+    var jsonViewerData = chnobean.jsonviewer.domify(sampleJson);
+
+    document.getElementById('container').appendChild(jsonViewerData.rootElement);
 </script>
 
 <div>

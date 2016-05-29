@@ -5,22 +5,22 @@
 	margin-left: 20px; 
 }
 .jsonviewer .key { 
-	font-weight: bold; 
+	color: #881391;
 }
 .jsonviewer .number { 
-	color: blue; 
+	color: #1c00cf; 
 }
 .jsonviewer .boolean { 
-	color: #000088; 
+	color: #1c00cf; 
 }
 .jsonviewer .null { 
-	color: #000088; 
+	color: #808080; 
 }
 .jsonviewer .string { 
-	color: green; 
+	color: #c41a16; 
 }
 .jsonviewer .undefined { 
-	color: gray; 
+	color: #808080; 
 }
 .jsonviewer .token { 
 	color: #AAAAAA;
@@ -29,7 +29,7 @@
 	cursor: pointer;
 }
 .jsonviewer .ellipsis { 
-	color: #A050C0;
+	color: #40A040;
 }
 .jsonviewer .header { 
 	cursor: pointer;
