@@ -1,8 +1,7 @@
-.jsonvieer span {
+.jsonviewer {
 	font-family: monospace;
 }
-.jsonviewer div { 
-	font-family: monospace;
+.jsonviewer div.nested { 
 	margin-left: 20px; 
 }
 .jsonviewer .key { 
@@ -31,6 +30,12 @@
 }
 .jsonviewer .ellipsis { 
 	color: #A050C0;
+}
+.jsonviewer .header { 
+	cursor: pointer;
+}
+.jsonviewer .footer { 
+	cursor: pointer;
 }
 .jsonviewer .collapsed { 
 	cursor: pointer;

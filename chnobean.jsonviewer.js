@@ -96,7 +96,7 @@
     function createSimple(nodeInfo) {
         var r = start(nodeInfo).concat([span(nodeInfo.simpleContent, nodeInfo.type)]);
         addComma(r, nodeInfo);
-        return div(r);
+        return div(r, 'nested');
     }
 
     // create nested content (includes an open and a collapsed version, one of which is hidden)
@@ -107,10 +107,8 @@
         }
         var open = createNestedOpen(nodeInfo);
         var collapsed = createNestedCollapsed(nodeInfo);
-        open._toggleWith = collapsed;
-        open.addEventListener('click', collapseToggleOnClick);
-        collapsed._toggleWith = open;
-        collapsed.addEventListener('click', collapseToggleOnClick);
+        nodeInfo.element = open;
+        nodeInfo.collapsedElement = collapsed;
         if (nodeInfo.level >= collapseLevel) {
             open.style.display = 'none';
         } else {
@@ -120,19 +118,31 @@
     }
 
     function createNestedOpen(nodeInfo) {
-        var r = start(nodeInfo);
+        var r;
+
+        r = start(nodeInfo);
         r.push(span(nodeInfo.openToken, 'token open_token ' + nodeInfo.type + '_token'));
-        r.push(nodeInfo.children);
-        r.push(span(nodeInfo.closeToken, 'token close_token ' + nodeInfo.type + '_token'));
+        var header = div(r, 'header');
+        header._nodeInfo = nodeInfo;
+        header.addEventListener('click', onClickCollapse);
+
+        r = [span(nodeInfo.closeToken, 'token close_token ' + nodeInfo.type + '_token')];
         addComma(r, nodeInfo);
-        return div(r, 'open');
+        var footer = div(r, 'footer');
+        footer._nodeInfo = nodeInfo;
+        footer.addEventListener('click', onClickCollapse);
+
+        return div([header, nodeInfo.children, footer], 'nested open');
     }
 
     function createNestedCollapsed(nodeInfo) {
         var r = start(nodeInfo);
         r.push(span(nodeInfo.openToken + ellipsis(nodeInfo.children.length) + nodeInfo.closeToken, 'ellipsis ' + nodeInfo.tyoe +'_ellipsis'));
         addComma(r, nodeInfo);
-        return div(r, 'collapsed');
+        var el = div(r, 'nested collapsed');
+        el._nodeInfo = nodeInfo;
+        el.addEventListener('click', onClickOpen);
+        return el;
     }
 
     // creates the "key" part of sub-elements
@@ -145,9 +155,17 @@
         if (nodeInfo.hasNext) r.push(span(',', 'token comma'));
     }
 
-    function collapseToggleOnClick(event) {
-        this.style.display = 'none';
-        this._toggleWith.style.display = '';
+    function onClickCollapse(event) {
+        var nodeInfo = this._nodeInfo;
+        nodeInfo.element.style.display = 'none';
+        nodeInfo.collapsedElement.style.display = '';
+        event.stopPropagation();
+    }
+
+    function onClickOpen(event) {
+        var nodeInfo = this._nodeInfo;
+        nodeInfo.element.style.display = '';
+        nodeInfo.collapsedElement.style.display = 'none';
         event.stopPropagation();
     }
 
