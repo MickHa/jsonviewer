@@ -1,0 +1,42 @@
+.jsonviewer {
+	font-family: monospace;
+}
+.jsonviewer div.nested { 
+	margin-left: 20px; 
+}
+.jsonviewer .key { 
+	color: #881391;
+}
+.jsonviewer .number { 
+	color: #1c00cf; 
+}
+.jsonviewer .boolean { 
+	color: #1c00cf; 
+}
+.jsonviewer .null { 
+	color: #808080; 
+}
+.jsonviewer .string { 
+	color: #c41a16; 
+}
+.jsonviewer .undefined { 
+	color: #808080; 
+}
+.jsonviewer .token { 
+	color: #AAAAAA;
+}
+.jsonviewer .open_token {
+	cursor: pointer;
+}
+.jsonviewer .ellipsis { 
+	color: #40A040;
+}
+.jsonviewer .header { 
+	cursor: pointer;
+}
+.jsonviewer .footer { 
+	cursor: pointer;
+}
+.jsonviewer .collapsed { 
+	cursor: pointer;
+}

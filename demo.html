@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Demo for jsonviewer</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link type="text/css" rel="stylesheet" href="chnobean.jsonviewer.css" />
+    <script type="text/javascript" src="chnobean.jsonviewer.js"></script>
+</head>
+<body>
+
+<div class="container-fluid">
+
+    <h1>Demo for chnobean.jsonviewer</h1>
+
+    <div id="container"></div>
+
+<script type="text/javascript">
+    var sampleJson = {
+        'title': 'Some funky title',
+        'version': 42,
+        'notes': [
+            {
+                'heading': 'Very first note',
+                'body': 'Does <b>not</b> matter',
+                'work_in_progress': true,
+                'will_be_done_soon': false,
+                'zero': 0,
+                'some_undefined_prop': undefined
+            },
+            {
+                'heading': 'Another note',
+                'body': 'Does not matter either',
+                'some_null_prop': null,
+                'nested_empty_array': [],
+                'nested_empty_object': {}
+            },
+            {
+                'heading': 'Third note',
+                'body': 'This one goes deep',
+                'nested_object': {
+                    'foo': 'bar',
+                    'bar': 9023
+                },
+                'nested_array': [
+                    90312,
+                    'hello',
+                    null,
+                    [
+                        90312,
+                        'hello',
+                        null,
+                    ],
+                    undefined,
+                    {},
+                    [],
+                    321
+                ]
+            }
+        ],
+        'tips': {
+            'before': {
+                'importance': 'high',
+                'fancynumber': 12380923
+            },
+            'after': {
+                'importance': 'low',
+                'fancydecimal': 312321.32,
+                'nested1': {
+                    'nested2': {
+                        'nested3': {
+                            'nested1': {
+                                'lastnode': true
+                            }
+                       }
+                    }
+                }
+            },
+            'primes': [
+                5,
+                7,
+                13,
+                'random string',
+                101,
+                {
+                    'type': 'object',
+                    'why_here': 'prime wanna be',
+                    'role model': 97
+                },
+                103
+            ]
+        }
+    };
+
+    var jsonViewerData = chnobean.jsonviewer.domify(sampleJson);
+
+    document.getElementById('container').appendChild(jsonViewerData.rootElement);
+</script>
+
+<div>
+<script type="text/javascript">
+    var strJsonOriginal = JSON.stringify(sampleJson);
+
+    var cloned = document.getElementById('container').cloneNode(true);
+    function remove_collapsed(n) {
+        var child = n.firstChild;
+        var toDelete;
+        while(child) {
+            if (child.className && child.className.indexOf('collapsed') >= 0) {
+                toDelete = child;
+            } else {
+                toDelete = null;
+            }
+            remove_collapsed(child);
+            child = child.nextSibling;
+            toDelete && toDelete.parentNode.removeChild(toDelete);
+        }
+    }
+    remove_collapsed(cloned);
+
+    try {
+        var jsonRendered;
+        eval('jsonRendered = ' + cloned.textContent)
+        var strJsonRenderer = JSON.stringify(jsonRendered);
+        if (strJsonRenderer != strJsonOriginal) {
+            throw 'no match';
+        } 
+    } catch(e) {
+        document.write('<div style="color:red">json does not match</div>');
+    }
+</script>
+
+</div>
+
+
+</div>
+
+</body>
+</html>
+
+
