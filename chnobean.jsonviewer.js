@@ -34,9 +34,14 @@
     "use strict";
 
     var defaultOptions = {
+        // returns true if this node should start out collapsed
         shouldStartCollapsed: function (nodeInfo) {
             // hide every 3rd level
             return nodeInfo.level > 0 && (nodeInfo.level % 3 == 0);
+        },
+        // returns the text content that should be used for ellipsis (collapsed) element
+        createEllipsis: function (nodeInfo) {
+            return nodeInfo.openToken + ellipsis(nodeInfo.children.length) + nodeInfo.closeToken;
         }
     };
 
@@ -157,7 +162,8 @@
 
     function createNestedCollapsed(nodeInfo) {
         var r = start(nodeInfo);
-        r.push(span(nodeInfo.openToken + ellipsis(nodeInfo.children.length) + nodeInfo.closeToken, 'ellipsis ' + nodeInfo.type +'_ellipsis'));
+        var ellipsis = options.createEllipsis(nodeInfo);
+        r.push(span(ellipsis, 'ellipsis ' + nodeInfo.type +'_ellipsis'));
         addComma(r, nodeInfo);
         var el = div(r, 'collapsed');
         el._nodeInfo = nodeInfo;
