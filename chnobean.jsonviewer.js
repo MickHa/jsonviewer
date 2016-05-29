@@ -47,7 +47,7 @@
         options = {};
         mixin(options, defaultOptions);
         mixin(options, customOptions);
-        var content = create(null, json, 0);
+        var content = create(null, json, 0, false, null);
         var rootElement = div(content, 'jsonviewer');
         return {
             rootElement: rootElement
@@ -55,8 +55,9 @@
     }
 
     // forward to the correct create function
-    function create(key, obj, level, hasNext) {
+    function create(key, obj, level, hasNext, parent) {
         var nodeInfo = {
+            parent: parent,
             key: key,
             obj: obj,
             type: typeofEx(obj),
@@ -93,7 +94,7 @@
         var childLevel = nodeInfo.level + 1;
         var arr = nodeInfo.obj;
         return arr.map(function(ao, i) {
-            return create(null, ao, childLevel, i+1 < arr.length);
+            return create(null, ao, childLevel, i+1 < arr.length, nodeInfo);
         });
     }
 
@@ -102,7 +103,7 @@
         var obj = nodeInfo.obj;
         var keys = Object.keys(obj);
         return keys.map(function(k, i) {
-            return create(k, obj[k], childLevel, i+1 < keys.length);
+            return create(k, obj[k], childLevel, i+1 < keys.length, nodeInfo);
         }); 
     }
 
