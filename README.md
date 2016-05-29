@@ -1,5 +1,8 @@
-jsonviewer - show JSON in pretty HTML
-=====================================
+jsonviewer
+==========
+
+JSON as a pretty and collapsible HTML
+-------------------------------------
 
 ```html
 <link type="text/css" rel="stylesheet" href="chnobean.jsonviewer.css" />
